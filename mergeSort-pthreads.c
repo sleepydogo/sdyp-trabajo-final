@@ -3,6 +3,7 @@ Changelog:
     - Tom (22/05): 
         * Agrego funciones para generar arreglos de 2^10 de enteros desordenados.
         * Agrego mediciones de tiempo
+        * Agrego variables para ejecucion en entorno local y para ejecutar en el cluster.
 
 */
 
@@ -11,10 +12,15 @@ Changelog:
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
+// Local
 #define ARRAY_SIZE (1 << 12) // 2^10 = 1024
 #define NUM_THREADS 2
 
+// Cluster
+const int NUM_THREADS_CLUSTER[] = {8, 16, 32, 64};
+const int ARRAY_SIZE_CLUSTER[] = {(1 << 24), (1 << 25), (1 << 26), (1 << 27)};
 
 typedef struct {
     int *arr;
@@ -130,7 +136,27 @@ void* parallel_mergesort(void *arg) {
     return NULL;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+
+    // Se tiene que ingresar un parametro que especifica donde se esta ejecutando el programa
+
+    if (argc != 2) {
+        // Si el usuario no proporciona exactamente un argumento, mostrar un mensaje de error y salir
+        printf("Uso: %s <parametro>\n", argv[0]);
+        return 1;
+    }
+
+    if (strcmp(argv[1], "local") == 0) {
+        
+        
+    } else if (strcmp(argv[1], "cluster") == 0) {
+
+
+    } else {
+        printf("Uso del programa: \n\t ./programa local - para entornos locales \n\t ./programa cluster - para ejecutar en el cluster III-LIDI \n\t ./programa help - imprime este mensaje");
+        return 1;
+    }
+
     size_t array_size; // almacena la cantidad de elementos del arreglo
     struct timespec start, end; // estructura para medir tiempos
 
