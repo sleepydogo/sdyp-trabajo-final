@@ -4,138 +4,78 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
-// #define threads 8
-// #define array_size(1 << 10) // Tamaño del array: 2,097,152
 
 #define ARRAY_SIZE_1 (1 << 24)
 #define ARRAY_SIZE_2 (1 << 25)
 #define ARRAY_SIZE_3 (1 << 26)
 #define ARRAY_SIZE_4 (1 << 27)
 
-int *arr; // Declaración del array como puntero
+int *arr; 
 
-typedef struct
-{
+typedef struct {
     int thread_id;
+    int *arr_part;   // Puntero a la sección del arreglo
+    int part_size;   // Tamaño de la sección del arreglo
 } ThreadArgs;
 
 int num_threads = 0;
 int array_size_choice = 0;
 int array_size= 0;
-struct timespec start, end;
-double time_used;
 
-void merge(int arr[], int l, int m, int r);
-void *threadedMergeSort(void *args);
-void mergeSort(int arr[], int left, int right);
-int min(int x, int y) { return (x < y) ? x : y; }
-void printArray(int A[], int size);
-void fillArrayWithRandomNumbers(int A[], int size);
 
-void mergeSortParallel()
-{
-    pthread_t threads[num_threads];
-    ThreadArgs args[num_threads];
-    int size = array_size / num_threads;
+void* mergeSortIterative(void *arg) {
+    ThreadArgs *args = (ThreadArgs *)arg;
+    int thread_id = args->thread_id;
+    int *arr_part = args->arr_part;
+    int part_size = args->part_size;
 
-    for (int i = 0; i < num_threads; i++)
-    {
-        args[i].thread_id = i;
-        pthread_create(&threads[i], NULL, threadedMergeSort, (void *)&args[i]);
+    int *temp = (int *)malloc(part_size * sizeof(int));
+    if (temp == NULL) {
+        printf("No se pudo asignar memoria temporal para el thread %d.\n", thread_id);
+        pthread_exit(NULL);
     }
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    for (int i = 0; i < num_threads; i++)
-    {
-        pthread_join(threads[i], NULL);
-    }
-    clock_gettime(CLOCK_MONOTONIC, &end);
 
-    time_used = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    int i, j, k, lb1, lb2, ub1, ub2, size;
+    size = 1;
+    while (size < part_size) {
+        lb1 = 0;
+        k = 0;
 
-    printf("El algoritmo tardó %f segundos en ejecutarse.\n", time_used);
+        while (lb1 + size < part_size) {
+            lb2 = lb1 + size;
+            ub1 = lb2 - 1;
+            if (ub1 + size < part_size)
+                ub2 = ub1 + size;
+            else
+                ub2 = part_size - 1;
 
-    for (int size = array_size/ num_threads; size < array_size; size *= 2)
-    {
-        for (int left_start = 0; left_start < array_size; left_start += 2 * size)
-        {
-            int mid = min(left_start + size - 1, array_size- 1);
-            int right_end = min(left_start + 2 * size - 1, array_size- 1);
-            merge(arr, left_start, mid, right_end);
+            i = lb1;
+            j = lb2;
+
+            while (i <= ub1 && j <= ub2) {
+                if (arr_part[i] < arr_part[j])
+                    temp[k++] = arr_part[i++];
+                else
+                    temp[k++] = arr_part[j++];
+            }
+
+            while (i <= ub1) temp[k++] = arr_part[i++];
+            while (j <= ub2) temp[k++] = arr_part[j++];
+
+            lb1 = ub2 + 1;
         }
+
+        for (i = 0; i < k; i++) arr_part[i] = temp[i];
+
+        size = size * 2;
+
+        // printArray(arr_part, part_size); 
     }
-}
 
-void *threadedMergeSort(void *args)
-{
-    ThreadArgs *threadArgs = (ThreadArgs *)args;
-    int thread_id = threadArgs->thread_id;
-    int left = thread_id * (array_size/ num_threads);
-    int right = (thread_id == num_threads - 1) ? (array_size- 1) : ((thread_id + 1) * (array_size/ num_threads) - 1);
-
-    mergeSort(arr, left, right);
+    free(temp);
     pthread_exit(NULL);
 }
 
-void mergeSort(int arr[], int left, int right)
-{
-    if (left < right)
-    {
-        int mid = left + (right - left) / 2;
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
-        merge(arr, left, mid, right);
-    }
-}
-
-void merge(int arr[], int l, int m, int r)
-{
-    int i, j, k;
-    int n1 = m - l + 1;
-    int n2 = r - m;
-
-    int *L = (int *)malloc(n1 * sizeof(int));
-    int *R = (int *)malloc(n2 * sizeof(int));
-
-    for (i = 0; i < n1; i++)
-        L[i] = arr[l + i];
-    for (j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
-
-    i = 0;
-    j = 0;
-    k = l;
-    while (i < n1 && j < n2)
-    {
-        if (L[i] <= R[j])
-        {
-            arr[k] = L[i];
-            i++;
-        }
-        else
-        {
-            arr[k] = R[j];
-            j++;
-        }
-        k++;
-    }
-
-    while (i < n1)
-    {
-        arr[k] = L[i];
-        i++;
-        k++;
-    }
-
-    while (j < n2)
-    {
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
-
-    free(L);
-    free(R);
-}
 
 void printArray(int A[], int size)
 {
@@ -154,13 +94,13 @@ void fillArrayWithRandomNumbers(int A[], int size)
 
 void print_usage(const char *prog_name) {
     printf("Uso: %s -threads N -arraysize N\n", prog_name);
-    printf("Valores válidos para <threads>: 8, 16, 32, 64\n");
-    printf("Valores válidos para <arraysize>: 1 (2²⁴), 2 (2²⁵), 3 (2²⁶), 4 (2²⁷)\n");
+    printf("Valores válidos para <threads>: 8, 16, 32, 64 \n");
+    printf("Valores válidos para <arraysize>: 24, 25, 26, 27 \n");
 }
 
 int main(int argc, char *argv[]) {
     int opt;
-    while ((opt = getopt(argc, argv, "threads:arraysize:")) != -1) {
+    while ((opt = getopt(argc, argv, "t:a:")) != -1) {
         switch (opt) {
             case 't':
                 num_threads = atoi(optarg);
@@ -187,16 +127,16 @@ int main(int argc, char *argv[]) {
 
     // Verificar el valor de array_sizey asignar el tamaño correspondiente
     switch (array_size_choice) {
-        case 1:
+        case 24:
             array_size= ARRAY_SIZE_1;
             break;
-        case 2:
+        case 25:
             array_size= ARRAY_SIZE_2;
             break;
-        case 3:
+        case 26:
             array_size= ARRAY_SIZE_3;
             break;
-        case 4:
+        case 27:
             array_size= ARRAY_SIZE_4;
             break;
         default:
@@ -219,15 +159,47 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // Creamos las estructuras para calcular el tiempo de ejecucion 
+    struct timespec start, end;
+    double time_used;
+
+    // Llenamos el arreglo de numeros aleatorios
     fillArrayWithRandomNumbers(arr, array_size);
 
     printf("Given array is \n");
     // printArray(arr, ARRAY_SIZE);
 
-    mergeSortParallel();
+    // declaramos los hilos
+    pthread_t threads[num_threads];
+    
+    // declaramos el arreglo de argumentos para los hilos
+    ThreadArgs args[num_threads];
 
-    printf("\nSorted array is \n");
-    printArray(arr, array_size);
+    int i;
+    int part_size = array_size / num_threads;
+    // Crear los threads y pasar los argumentos
+    for (i = 0; i < num_threads; i++) {
+        args[i].thread_id = i;
+        args[i].arr_part = arr + part_size * i;  // Puntero al inicio de la sección del arreglo
+        args[i].part_size = part_size;
+
+        pthread_create(&threads[i], NULL, mergeSortIterative, (void *)&args[i]);
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    for (int i = 0; i < num_threads; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    time_used = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+
+    printf("El algoritmo tardó %f segundos en ejecutarse.\n", time_used);
+
+
+    //printf("\nSorted array is \n");
+    //printArray(arr, array_size);
 
     // Liberar la memoria asignada
     free(arr);

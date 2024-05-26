@@ -13,14 +13,18 @@ Changelog:
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 // Local
 #define ARRAY_SIZE (1 << 12) // 2^10 = 1024
-#define NUM_THREADS 2
+#define NUM_THREADS 4
 
 // Cluster
 const int NUM_THREADS_CLUSTER[] = {8, 16, 32, 64};
 const int ARRAY_SIZE_CLUSTER[] = {(1 << 24), (1 << 25), (1 << 26), (1 << 27)};
+
+// Config 
+bool config = NULL;
 
 typedef struct {
     int *arr;
@@ -139,7 +143,6 @@ void* parallel_mergesort(void *arg) {
 int main(int argc, char *argv[]) {
 
     // Se tiene que ingresar un parametro que especifica donde se esta ejecutando el programa
-
     if (argc != 2) {
         // Si el usuario no proporciona exactamente un argumento, mostrar un mensaje de error y salir
         printf("Uso: %s <parametro>\n", argv[0]);
@@ -147,13 +150,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(argv[1], "local") == 0) {
-        
-        
     } else if (strcmp(argv[1], "cluster") == 0) {
 
-
     } else {
-        printf("Uso del programa: \n\t ./programa local - para entornos locales \n\t ./programa cluster - para ejecutar en el cluster III-LIDI \n\t ./programa help - imprime este mensaje");
         return 1;
     }
 
