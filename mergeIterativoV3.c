@@ -91,7 +91,7 @@ void *mergeSortIterative(void *arg)
         size = size * 2;
     }
     printf("\n\nThread id: %d ya termino de ordenar! \n ", thread_id);
-    //printArray(arr_part_sorting, part_size_sorting);
+    // printArray(arr_part_sorting, part_size_sorting);
 
     if (temp != NULL)
     {
@@ -110,8 +110,8 @@ void *mergeSortIterative(void *arg)
     {
         if (arr_part_comparing_1[i] != arr_part_comparing_2[i])
         {
-    printf("Thread id: %d encontro elementos distintos en la posicion %d, arr = %d, arr2 = %d ! \n ", thread_id, i, arr_part_comparing_1[i], arr_part_comparing_2[i]);
-            
+            printf("Thread id: %d encontro elementos distintos en la posicion %d, arr = %d, arr2 = %d ! \n ", thread_id, i, arr_part_comparing_1[i], arr_part_comparing_2[i]);
+
             equals = 1;
             break;
         }
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 
     // Llenamos el arreglo de numeros aleatorios
     fillArrayWithRandomNumbers(arr, array_size);
-    //fillArrayWithRandomNumbers(arr2, array_size);
+    // fillArrayWithRandomNumbers(arr2, array_size);
     memcpy(arr2, arr, array_size * sizeof(int));
     // printf("\n\n Array 1 \n");
     // printArray(arr, array_size);
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
     printf("Numero de elementos a ordenar: %d\n", part_size_sorting);
     printf("Numero de elementos a comparar: %d\n", part_size_comparing);
     // Crear los threads y pasar los argumentos
-    int a=0, b=0;
+    int a = 0, b = 0;
     for (i = 0; i < num_threads; i++)
     {
         args[i].thread_id = i;
@@ -292,21 +292,21 @@ int main(int argc, char *argv[])
     }
 
     printf("\nSorted array is \n");
-    //printArray(arr, array_size);
+    // printArray(arr, array_size);
 
     sem_destroy(&semaphore);
     // Liberar la memoria asignada
 
-     if (arr != NULL)
+    if (arr != NULL)
     {
-         free(arr);
-         arr = NULL;
-     }
-     if (arr2 != NULL)
+        free(arr);
+        arr = NULL;
+    }
+    if (arr2 != NULL)
     {
-         free(arr2);
-         arr = NULL;
-     }
+        free(arr2);
+        arr = NULL;
+    }
 
     return 0;
 }
