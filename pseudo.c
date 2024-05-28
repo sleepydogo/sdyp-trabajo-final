@@ -36,3 +36,15 @@ if (id % 64 = 0)
 {
     mergeas tu parte con tu parte * 62
 }
+
+// Una vez que todos terminan de ordenas su parte
+for (i = 4; i <= THREADS; i *= 2)
+{
+
+    if (id % i == 0)
+    {
+        // rangoQueProcesas = rangoQueProcesas*2;
+        // Mergeas el rango que te toca procesar (Las dos mitades)
+        // barreraX  --> Barrera[i] la esperan 64/i procesos, por ejemplo cuando i=4, la barrera es de 16, cuando i es de 8 la barrera es de 8...
+    }
+}
