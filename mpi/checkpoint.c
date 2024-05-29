@@ -218,38 +218,40 @@ void p0(int N, int cp, int id)
     }
     // liberar recursos
 
-    printf("\n\n ");
+    // printf("\n\n ");
 
-    for (u = 1; u < cp; u++)
-    {
-        MPI_Send(&vLoc[u * tamanio], tamanio, MPI_INT, u, id, MPI_COMM_WORLD);
-        MPI_Send(&vLoc2[u * tamanio], tamanio, MPI_INT, u, id, MPI_COMM_WORLD);
-    }
-    int sumador = 0, totalizador = 0;
+    // for (u = 1; u < cp; u++)
+    // {
+    //     MPI_Send(&vLoc[u * tamanio], tamanio, MPI_INT, u, id, MPI_COMM_WORLD);
+    //     MPI_Send(&vLoc2[u * tamanio], tamanio, MPI_INT, u, id, MPI_COMM_WORLD);
+    // }
+    
+    // // Procesamos nosotros nuestra parte
+    // int sumador = 0, totalizador = 0;
 
-    for (int m = 0; m < tamanio; m++)
-    {
-        if (vLoc2[m] != vLoc[m])
-        {
-            sumador = 1;
-            break;
-        }
-    }
+    // for (int m = 0; m < tamanio; m++)
+    // {
+    //     if (vLoc2[m] != vLoc[m])
+    //     {
+    //         sumador = 1;
+    //         break;
+    //     }
+    // }
 
-    for (u = 1; u < cp - 1; u++)
-    {
-        MPI_Recv(&sumador, sizeof(int), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        totalizador += sumador;
-    }
+    // for (u = 1; u < cp - 1; u++)
+    // {
+    //     MPI_Recv(&sumador, sizeof(int), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    //     totalizador += sumador;
+    // }
 
-    if (totalizador == 0)
-    {
-        printf("todo cheto cumpa");
-    }
-    else
-    {
-        printf("cagaste");
-    }
+    // if (totalizador == 0)
+    // {
+    //     printf("todo cheto cumpa");
+    // }
+    // else
+    // {
+    //     printf("cagaste");
+    // }
 
     free(Vtot);
     free(vLoc);
@@ -301,16 +303,20 @@ void p1(int N, int cp, int id)
         }
         else
         {
+            printf("bocaaaaaaaaaaa");
             // Los que envian al vecino
             MPI_Send(vLoc, tamanioActual, MPI_INT, (id - paso), id, MPI_COMM_WORLD);
             // Espero que reciba
             free(vLoc);
+            vLoc = NULL;
             break;
             // break
         }
 
         //  free(vLoc); // Tanto si entras al if como sino siempre queda un vLoc alocado
     }
+
+    free(Vtot);
 
     MPI_Scatter(Vtot, tamanio, MPI_INT, vLoc, tamanio, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -350,30 +356,27 @@ void p1(int N, int cp, int id)
             MPI_Send(vLoc, tamanioActual, MPI_INT, (id - paso), id, MPI_COMM_WORLD);
             // Espero que reciba
             free(vLoc);
+            vLoc = NULL;
             break;
-            // break
         }
+        // int sumador = 0;
+        // int *vComparing = (int *)malloc(tamanio * sizeof(int));
+        // int *vComparing2 = (int *)malloc(tamanio * sizeof(int));
 
-        int sumador = 0;
-        int *vComparing = (int *)malloc(tamanio * sizeof(int));
-        int *vComparing2 = (int *)malloc(tamanio * sizeof(int));
+        // MPI_Recv(vComparing, tamanio, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // MPI_Recv(vComparing2, tamanio, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        MPI_Recv(vComparing, tamanio, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        MPI_Recv(vComparing2, tamanio, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-        for (int m = 0; m < tamanio; m++)
-        {
-            if (vComparing2[m] != vComparing[m])
-            {
-                sumador = 1;
-                break;
-            }
-        }
-        MPI_Send(&sumador, sizeof(int), MPI_INT, 0, id, MPI_COMM_WORLD);
-        free(vComparing2);
-        free(vComparing);
-        free(vLoc); //
-
+        // for (int m = 0; m < tamanio; m++)
+        // {
+        //     if (vComparing2[m] != vComparing[m])
+        //     {
+        //         sumador = 1;
+        //         break;
+        //     }
+        // }
+        // MPI_Send(&sumador, sizeof(int), MPI_INT, 0, id, MPI_COMM_WORLD);
+        // free(vComparing2);
+        // free(vComparing);
         //  free(vLoc); // Tanto si entras al if como sino siempre queda un vLoc alocado
     }
 }
