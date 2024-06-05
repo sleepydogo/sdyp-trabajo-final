@@ -98,13 +98,46 @@ void *mergeSortIterative(void *arg)
         free(temp);
     }
 
+
+    // TODO: Cambiar esto por una barrera o semaforo de 4 posiciones
     sem_wait(&semaphore);
     finished_sorting_threads++;
     sem_post(&semaphore);
+
     while (finished_sorting_threads < num_threads)
     {
         // No hacer nada, solo esperar
     }
+
+    
+    if (thread_id % 2 == 0) {
+        // barrera 32
+        for (int lol = 4; lol <= num_threads; lol*2) {
+
+            if (thread_id % lol == 0){
+                // BARRERA[lol]
+                // 
+            }
+        }
+    }
+
+    // thread id es par? 
+    //  si --> Soy el 0 o el 4? 
+    //      si soy el 0 
+    //          termino el proceso 2?
+    // terminaron todos los hilos pares?
+    //
+    //
+    //
+    //
+    // es thread id 0? 
+    //      terminaron todos los hilos? 
+    //      hacemos el merge    
+    //
+    //
+
+    // esta todo listo para comparar? 
+
     equals = 0;
     for (i = 0; i < part_size_comparing; i++)
     {
@@ -223,6 +256,10 @@ int main(int argc, char *argv[])
     fillArrayWithRandomNumbers(arr, array_size);
     // fillArrayWithRandomNumbers(arr2, array_size);
     memcpy(arr2, arr, array_size * sizeof(int));
+    int lol = 0;
+    lol = arr2[16777216];
+    arr2[16777216] = arr2[0];
+    arr2[0] = lol;
     // printf("\n\n Array 1 \n");
     // printArray(arr, array_size);
     // printf("\n\n Array 2 \n");
@@ -240,6 +277,7 @@ int main(int argc, char *argv[])
     sem_init(&semaphore, 0, 1);
     printf("Numero de elementos a ordenar: %d\n", part_size_sorting);
     printf("Numero de elementos a comparar: %d\n", part_size_comparing);
+
     // Crear los threads y pasar los argumentos
     int a = 0, b = 0;
     for (i = 0; i < num_threads; i++)
