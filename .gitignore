@@ -1,0 +1,54 @@
+# Build artifacts
+build/
+*.o
+*.out
+*.exe
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Claude
+.claude/
+
+# Benchmark results
+benchmarks/results/
+
+# Debug files
+*.dSYM/
+*.su
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+parallel_comparator
+
+# Profiling data
+gmon.out
+perf.data*
+*.gcda
+*.gcno
+*.gcov
+
+# Core dumps
+core
+core.*
